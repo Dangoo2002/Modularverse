@@ -6,73 +6,66 @@ export async function fetchWithAuth(url, options = {}) {
   const isAuthEndpoint =
     url.includes('/login') ||
     url.includes('/register') ||
-    url.includes('/refresh');
+    url.includes('/refresh') ||
+    url.includes('/logout');
 
-  let res;
   try {
-    res = await fetch(fullUrl, {
+    const res = await fetch(fullUrl, {
       ...options,
-      credentials: 'include',
+      credentials: 'include', // This sends cookies
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
       },
     });
-  } catch (fetchErr) {
-    // Network-level failure (offline, CORS, etc.)
-    throw new Error('Network error: Could not reach the server');
-  }
 
-  // Handle 401 → only refresh if not on auth endpoints and we likely have tokens
-  if (
-    res.status === 401 &&
-    !isAuthEndpoint &&
-    document.cookie.includes('refreshToken=')
-  ) {
-    try {
-      const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {
-        method: 'POST',
-        credentials: 'include',
-      });
+    // Handle 401 → only refresh if not on auth endpoints
+    if (res.status === 401 && !isAuthEndpoint) {
+      try {
+        const refreshRes = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/refresh`,
+          {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
-      if (refreshRes.ok) {
-        // Retry original request
-        return fetchWithAuth(url, options);
-      }
-
-      throw new Error('Session expired. Please log in again.');
-    } catch (refreshErr) {
-      throw new Error('Session expired. Please log in again.');
-    }
-  }
-
-  // For all other responses
-  if (!res.ok) {
-    let errorMessage = `Request failed (${res.status})`;
-
-    try {
-      // Safely try to parse JSON error
-      const data = await res.json();
-      // Prefer backend's error message if it exists
-      errorMessage = data.error || errorMessage;
-    } catch (jsonErr) {
-      // JSON parsing failed → use status-based fallback
-      if (res.status === 400) {
-        errorMessage = 'Invalid input – check your details';
-      } else if (res.status === 401) {
-        errorMessage = 'Unauthorized – invalid credentials';
-      } else if (res.status === 500) {
-        errorMessage = 'Server error – please try again later';
+        if (refreshRes.ok) {
+          // Retry original request
+          return fetchWithAuth(url, options);
+        } else {
+          // Refresh failed - clear any stale tokens
+          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/logout`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+          throw new Error('Session expired. Please log in again.');
+        }
+      } catch (refreshErr) {
+        throw new Error('Session expired. Please log in again.');
       }
     }
 
-    throw new Error(errorMessage);
-  }
+    // For all other responses
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      const errorMessage = data.error || `Request failed (${res.status})`;
+      throw new Error(errorMessage);
+    }
 
-  return res;
+    return res;
+  } catch (error) {
+    if (error.message === 'Network error: Could not reach the server') {
+      throw error;
+    }
+    throw new Error(error.message || 'Request failed');
+  }
 }
 
-// Get current user (unchanged)
+// Get current user
 export async function getUser() {
   try {
     const res = await fetchWithAuth('/me');
