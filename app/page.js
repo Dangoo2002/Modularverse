@@ -961,7 +961,7 @@ export default function HomePage() {
                         {/* Screen Content */}
                         <div className="aspect-[9/19.5] bg-white relative overflow-hidden">
                           <img
-                            src="/cms-seamless-screenshot.jpg" // Placeholder
+                            src="/3.jpeg" // Placeholder
                             alt="Seamless CMS View"
                             className="w-full h-full object-cover"
                             onError={(e) => {
