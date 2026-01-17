@@ -84,7 +84,7 @@ function Navbar() {
             <Link href="/" className="flex items-center space-x-2 group">
               <div className="relative overflow-hidden rounded-xl">
                 <img
-                  src="/placeholder-logo.png"
+                  src="/logo.jpeg"
                   alt="ModularVerse CMS Logo"
                   className="w-8 h-8 sm:w-10 sm:h-10 object-cover transform group-hover:scale-105 transition-all duration-200"
                 />
@@ -224,7 +224,7 @@ function Navbar() {
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-4 border-b border-gray-200/50 bg-white/50 backdrop-blur-sm">
                   <div className="flex items-center space-x-2">
-                    <img src="/placeholder-logo.png" alt="Logo" className="w-9 h-9 object-cover rounded-md shadow-sm" />
+                    <img src="/logo.jpeg" alt="Logo" className="w-9 h-9 object-cover rounded-md shadow-sm" />
                     <span className="text-xl font-semibold text-gray-900">ModularVerse</span>
                   </div>
                   <button
@@ -355,7 +355,7 @@ function Footer() {
             <div className="flex items-center space-x-2 mb-4 group">
               <div className="relative overflow-hidden rounded-lg">
                 <img
-                  src="/placeholder-logo.png" // Placeholder for your logo
+                  src="/logo.jpeg" // Placeholder for your logo
                   alt="ModularVerse CMS Logo"
                   className="w-6 h-6 sm:w-8 sm:h-8 object-cover transform group-hover:scale-105 transition-all duration-300"
                 />
