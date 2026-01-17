@@ -435,8 +435,8 @@ function Footer() {
                 <svg className="w-5 h-5 text-black flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
-                <a href="tel:+254757448651" className="text-gray-600 text-sm sm:text-base hover:text-blue-600 transition-colors duration-300">
-                  +254 757 448651
+                <a href="tel:+25411111111" className="text-gray-600 text-sm sm:text-base hover:text-blue-600 transition-colors duration-300">
+                  +254 111 111111
                 </a>
               </div>
               <div className="flex items-center space-x-3">
@@ -1202,7 +1202,7 @@ export default function HomePage() {
 
         {/* WhatsApp Button - Responsive (Adapted, optional for CMS) */}
         <motion.a
-          href="https://wa.me/254757448651?text=Hello%20ModularVerse,%20I%20wanted%20to%20inquire%20about%20"
+          href="https://chat.whatsapp.com/DxOocdENLxhJWTsJ3jRlee"
           target="_blank"
           rel="noopener noreferrer"
           className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 flex items-center justify-center w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-full shadow-lg md:shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
