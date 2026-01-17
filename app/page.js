@@ -630,8 +630,8 @@ const faqs = [
 
 // Stats Data (Adapted to CMS)
 const stats = [
-  { value: '100+', label: 'Active Users', description: 'Managed accounts' },
-  { value: '500+', label: 'Published Posts', description: 'Content items' },
+  { value: '3+', label: 'Active Users', description: 'Managed accounts' },
+  { value: '3+', label: 'Published Posts', description: 'Content items' },
   { value: '99.9%', label: 'Uptime', description: 'Reliable service' },
   { value: '24/7', label: 'Support', description: 'Available help' },
 ];
@@ -741,7 +741,7 @@ export default function HomePage() {
                   <div className="relative z-10 rounded-2xl md:rounded-3xl overflow-hidden shadow-lg md:shadow-2xl border-4 md:border-8 border-white">
                     <div className="aspect-[4/3] bg-gradient-to-br from-gray-200/10 to-gray-400/10">
                       <img
-                        src="/cms-dashboard-screenshot.jpg" // Placeholder image for CMS dashboard
+                        src="/1.webp" // Placeholder image for CMS dashboard
                         alt="ModularVerse CMS Dashboard"
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -755,7 +755,7 @@ export default function HomePage() {
                     <div className="relative rounded-xl md:rounded-2xl overflow-hidden shadow-lg md:shadow-xl border-2 md:border-4 border-white">
                       <div className="aspect-[9/16] bg-gradient-to-br from-gray-900 to-gray-800">
                         <img
-                          src="/cms-mobile-view.jpg" // Placeholder for mobile view
+                          src="/1.webp" // Placeholder for mobile view
                           alt="Mobile CMS View"
                           className="w-full h-full object-cover"
                         />
@@ -858,7 +858,7 @@ export default function HomePage() {
               <div className="relative z-10 rounded-xl md:rounded-2xl lg:rounded-3xl overflow-hidden shadow-lg md:shadow-2xl border-4 md:border-8 border-white">
                 <div className="aspect-[16/9] bg-gradient-to-br from-gray-200/10 to-gray-400/10">
                   <img
-                    src="/cms-overview.jpg" // Placeholder
+                    src="/2.png" // Placeholder
                     alt="CMS Overview"
                     className="w-full h-full object-cover"
                   />
@@ -869,7 +869,7 @@ export default function HomePage() {
                 <div className="relative rounded-lg md:rounded-xl lg:rounded-2xl overflow-hidden shadow-lg md:shadow-xl border-2 md:border-4 border-white">
                   <div className="aspect-[9/16] bg-gradient-to-br from-gray-900 to-gray-800">
                     <img
-                      src="/cms-mobile-overview.jpg" // Placeholder
+                      src="/2.png" // Placeholder
                       alt="Mobile CMS View"
                       className="w-full h-full object-cover"
                     />
