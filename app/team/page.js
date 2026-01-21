@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 // Group members data
 const members = [
-  { name: 'Allan Alvine', id: 'SCT21-0080/2021' },
+  { name: 'Allan Alvine', id: 'SCT212-0080/2021' },
   { name: 'Kennedy Wanakacha', id: 'SCT212-0074/2021' },
   { name: 'Princeton Mwachala', id: 'SCT212-0657/2021' },
   { name: 'Diana Wanjiru', id: 'SCT212-0119/2022' },
