@@ -183,7 +183,7 @@ export default function DashboardPage() {
 
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-6 md:p-8 border-b border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900">Your Content</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Approved Content</h2>
             </div>
             {posts.length === 0 ? (
               <div className="p-12 text-center text-gray-500">
