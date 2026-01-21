@@ -6,22 +6,43 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './context/AuthContext'; 
+
 function Navbar() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user, loading, logout } = useAuth(); // Get auth state
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { user, loading, logout } = useAuth();
+  const userMenuRef = useRef(null);
+  const hamburgerRef = useRef(null);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+      if (hamburgerRef.current && !hamburgerRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
-      const isScrolled = window.scrollY > 10;
-      if (isScrolled !== scrolled) {
-        setScrolled(isScrolled);
-      }
+      setScrolled(window.scrollY > 10);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [scrolled]);
+  }, []);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -32,11 +53,9 @@ function Navbar() {
     { label: "Our Team", path: "/team" },
   ];
 
-  // Function to get user initials
   const getUserInitials = () => {
     if (!user) return '';
     
-    // Try to get from user data
     if (user.name) {
       const names = user.name.split(' ');
       if (names.length >= 2) {
@@ -45,12 +64,11 @@ function Navbar() {
       return names[0][0].toUpperCase();
     }
     
-    // Fallback to email first letter
     if (user.email) {
       return user.email[0].toUpperCase();
     }
     
-    return 'U'; // Default
+    return 'U';
   };
 
   const sidebarVariants = {
@@ -67,9 +85,14 @@ function Navbar() {
     closed: { opacity: 0, x: 20 },
   };
 
+  const handleLogout = async () => {
+    setUserMenuOpen(false);
+    setIsOpen(false);
+    await logout();
+  };
 
   return (
-   <nav
+    <nav
       className={`fixed top-6 left-1/2 transform -translate-x-1/2 w-[95%] sm:w-[90%] max-w-4xl z-50 transition-all duration-300 touch-none ${
         scrolled
           ? 'bg-white/95 backdrop-blur-lg shadow-xl border border-gray-100/50'
@@ -79,7 +102,7 @@ function Navbar() {
     >
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo - Left aligned */}
+          {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="flex items-center space-x-2 group">
               <div className="relative overflow-hidden rounded-xl">
@@ -88,7 +111,6 @@ function Navbar() {
                   alt="ModularVerse CMS Logo"
                   className="w-8 h-8 sm:w-10 sm:h-10 object-cover transform group-hover:scale-105 transition-all duration-200"
                 />
-                <div className="absolute inset-0 bg-gradient-to-tr from-gray-900/10 to-gray-800/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
               </div>
               <div className="flex flex-col">
                 <span className="text-lg sm:text-xl font-bold tracking-tight text-gray-900">ModularVerse</span>
@@ -97,7 +119,7 @@ function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop Navigation - Centered */}
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1 absolute left-1/2 transform -translate-x-1/2">
             {navItems.map((item) => {
               const isActive = pathname === item.path;
@@ -118,91 +140,96 @@ function Navbar() {
                       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     />
                   )}
-                  {!isActive && (
-                    <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-1 rounded-full bg-gradient-to-r from-gray-900/50 to-gray-800/50 group-hover:w-6 transition-all duration-200"></span>
-                  )}
                 </Link>
               );
             })}
           </div>
 
-          {/* Right Section - Auth Only */}
+          {/* Right Section - Auth */}
           <div className="flex items-center space-x-3">
-            {loading ? (
-              // Loading state
-              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
-            ) : user ? (
-              // User is logged in - show user avatar
-              <div className="flex items-center space-x-3">
-                <div className="relative group">
-                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-gray-900 to-gray-800 flex items-center justify-center text-white font-semibold text-sm md:text-base cursor-pointer">
-                    {getUserInitials()}
-                  </div>
-                  {/* Dropdown menu */}
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 z-50">
-                    <div className="p-3 border-b border-gray-100">
-                      <p className="font-medium text-gray-900 text-sm truncate">{user.name || user.email}</p>
-                      <p className="text-xs text-gray-500">{user.role}</p>
-                    </div>
-                    <div className="p-2">
-                      <Link
-                        href="/dashboard"
-                        className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        Dashboard
-                      </Link>
-                      <Link
-                        href="/profile"
-                        className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        Profile Settings
-                      </Link>
-                      <button
-                        onClick={logout}
-                        className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-1"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              // User is not logged in - show auth links
+            {!loading ? (
               <>
-                <Link
-                  href="/login"
-                  className="hidden md:block relative overflow-hidden px-6 py-2.5 rounded-full text-sm font-medium bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 touch-none"
-                >
-                  <span className="relative z-10">Login</span>
-                  <span className="absolute inset-0 bg-white/0 hover:bg-white/10 transition-all duration-200"></span>
-                </Link>
-                <Link
-                  href="/register"
-                  className="hidden md:block relative overflow-hidden px-6 py-2.5 rounded-full text-sm font-medium bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 touch-none"
-                >
-                  <span className="relative z-10">Register</span>
-                  <span className="absolute inset-0 bg-white/0 hover:bg-white/10 transition-all duration-200"></span>
-                </Link>
+                {user ? (
+                  // User is logged in - show user avatar
+                  <div className="relative" ref={userMenuRef}>
+                    <button
+                      onClick={() => setUserMenuOpen(!userMenuOpen)}
+                      className="flex items-center space-x-2 focus:outline-none"
+                    >
+                      <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-gray-900 to-gray-800 flex items-center justify-center text-white font-semibold text-sm md:text-base">
+                        {getUserInitials()}
+                      </div>
+                      <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    
+                    {/* Dropdown menu */}
+                    {userMenuOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50 animate-in slide-in-from-top-2">
+                        <div className="p-3 border-b border-gray-100">
+                          <p className="font-medium text-gray-900 text-sm truncate">{user.name || user.email}</p>
+                          <p className="text-xs text-gray-500">{user.role}</p>
+                        </div>
+                        <div className="p-2">
+                          <Link
+                            href="/dashboard"
+                            className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            Dashboard
+                          </Link>
+                          <Link
+                            href="/profile"
+                            className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            Profile Settings
+                          </Link>
+                          <button
+                            onClick={handleLogout}
+                            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-1"
+                          >
+                            Logout
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  // User is not logged in - show auth links IMMEDIATELY
+                  <>
+                    <Link
+                      href="/login"
+                      className="hidden md:block relative overflow-hidden px-6 py-2.5 rounded-full text-sm font-medium bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 touch-none"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="hidden md:block relative overflow-hidden px-6 py-2.5 rounded-full text-sm font-medium bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 touch-none"
+                    >
+                      Register
+                    </Link>
+                  </>
+                )}
               </>
+            ) : (
+              // Loading skeleton - only shows briefly
+              <div className="w-9 h-9 rounded-full bg-gray-200 animate-pulse"></div>
             )}
 
             {/* Mobile Hamburger */}
-            <div className="md:hidden flex items-center">
+            <div className="md:hidden flex items-center" ref={hamburgerRef}>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleMenu();
-                }}
+                onClick={toggleMenu}
                 className="relative inline-flex items-center justify-center p-2 w-10 h-10 rounded-full text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none transition-all duration-200 touch-none"
                 aria-expanded={isOpen}
               >
                 <span className="sr-only">Toggle menu</span>
-                <div className="relative w-6 h-5">
-                  <span className={`absolute left-0 block h-0.5 w-6 bg-current rounded-full transform transition-all duration-200 ${isOpen ? 'rotate-45 translate-y-2' : 'top-0'}`} />
-                  <span className={`absolute left-0 block h-0.5 w-6 bg-current rounded-full transform transition-all duration-200 ${isOpen ? 'opacity-0' : 'top-2'}`} />
-                  <span className={`absolute left-0 block h-0.5 w-6 bg-current rounded-full transform transition-all duration-200 ${isOpen ? '-rotate-45 -translate-y-2' : 'top-4'}`} />
-                </div>
+                {isOpen ? (
+                  <X className="w-5 h-5" />
+                ) : (
+                  <Menu className="w-5 h-5" />
+                )}
               </button>
             </div>
           </div>
@@ -219,7 +246,6 @@ function Navbar() {
               animate="open"
               exit="closed"
               variants={sidebarVariants}
-              onClick={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-4 border-b border-gray-200/50 bg-white/50 backdrop-blur-sm">
@@ -228,13 +254,11 @@ function Navbar() {
                     <span className="text-xl font-semibold text-gray-900">ModularVerse</span>
                   </div>
                   <button
-                    onClick={toggleMenu}
+                    onClick={() => setIsOpen(false)}
                     className="p-2 rounded-full hover:bg-gray-200/50 transition-all duration-150 touch-none"
                     aria-label="Close menu"
                   >
-                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="w-5 h-5 text-gray-700" />
                   </button>
                 </div>
                 <div className="flex-1 px-3 py-6 overflow-y-auto">
@@ -261,66 +285,57 @@ function Navbar() {
                             <div className="flex items-center justify-between">
                               <span>{item.label}</span>
                             </div>
-                            {isActive && (
-                              <motion.span
-                                className="absolute right-4 top-1/2 transform -translate-y-1/2 w-1.5 h-8 rounded-full bg-gradient-to-b from-gray-900 to-gray-800"
-                                initial={{ height: 0 }}
-                                animate={{ height: '2rem' }}
-                                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                              />
-                            )}
                           </Link>
                         </motion.div>
                       );
                     })}
                     
-                    {/* Mobile Auth Links */}
-                    {user ? (
-                      <motion.div custom={navItems.length} variants={menuItemVariants} className="mt-6 pt-4 border-t border-gray-200/50">
-                        <div className="flex items-center px-4 py-3 mb-4">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gray-900 to-gray-800 flex items-center justify-center text-white font-semibold mr-3">
-                            {getUserInitials()}
+                    {/* Mobile Auth Links - Show IMMEDIATELY based on auth state */}
+                    <motion.div custom={navItems.length} variants={menuItemVariants} className="mt-6 pt-4 border-t border-gray-200/50">
+                      {user ? (
+                        <>
+                          <div className="flex items-center px-4 py-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-gray-900 to-gray-800 flex items-center justify-center text-white font-semibold mr-3">
+                              {getUserInitials()}
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{user.name || user.email}</p>
+                              <p className="text-xs text-gray-500">{user.role}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{user.name || user.email}</p>
-                            <p className="text-xs text-gray-500">{user.role}</p>
-                          </div>
-                        </div>
-                        <Link
-                          href="/dashboard"
-                          onClick={() => setIsOpen(false)}
-                          className="block w-full px-4 py-3 rounded-xl text-center text-base font-medium bg-gray-900 text-white mb-2"
-                        >
-                          Dashboard
-                        </Link>
-                        <button
-                          onClick={() => {
-                            logout();
-                            setIsOpen(false);
-                          }}
-                          className="block w-full px-4 py-3 rounded-xl text-center text-base font-medium bg-red-600 text-white"
-                        >
-                          Logout
-                        </button>
-                      </motion.div>
-                    ) : (
-                      <motion.div custom={navItems.length} variants={menuItemVariants} className="mt-6 pt-4 border-t border-gray-200/50">
-                        <Link
-                          href="/login"
-                          onClick={() => setIsOpen(false)}
-                          className="block w-full px-4 py-3.5 rounded-xl text-center text-base font-medium bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 touch-none"
-                        >
-                          Login
-                        </Link>
-                        <Link
-                          href="/register"
-                          onClick={() => setIsOpen(false)}
-                          className="block w-full px-4 py-3.5 rounded-xl text-center text-base font-medium bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 touch-none mt-2"
-                        >
-                          Register
-                        </Link>
-                      </motion.div>
-                    )}
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setIsOpen(false)}
+                            className="block w-full px-4 py-3 rounded-xl text-center text-base font-medium bg-gray-900 text-white mb-2"
+                          >
+                            Dashboard
+                          </Link>
+                          <button
+                            onClick={handleLogout}
+                            className="block w-full px-4 py-3 rounded-xl text-center text-base font-medium bg-red-600 text-white"
+                          >
+                            Logout
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <Link
+                            href="/login"
+                            onClick={() => setIsOpen(false)}
+                            className="block w-full px-4 py-3.5 rounded-xl text-center text-base font-medium bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 touch-none"
+                          >
+                            Login
+                          </Link>
+                          <Link
+                            href="/register"
+                            onClick={() => setIsOpen(false)}
+                            className="block w-full px-4 py-3.5 rounded-xl text-center text-base font-medium bg-gradient-to-r from-gray-900 to-gray-800 text-white shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 touch-none mt-2"
+                          >
+                            Register
+                          </Link>
+                        </>
+                      )}
+                    </motion.div>
                   </motion.div>
                 </div>
               </div>
